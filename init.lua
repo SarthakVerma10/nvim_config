@@ -92,6 +92,7 @@ require('lazy').setup({
   -- require 'custom.plugins.eyeliner',
   require 'custom.plugins.scratch',
   require 'custom.plugins.leap',
+  -- require 'custom.plugins.angular',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -121,6 +122,19 @@ require('lazy').setup({
       task = '📌',
       lazy = '💤 ',
     },
+  },
+})
+
+vim.lsp.config('angularls', {
+  cmd = {
+    'node',
+    '--max-old-space-size=8096',
+    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin/ngserver',
+    '--stdio',
+    '--tsProbeLocations',
+    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
+    '--ngProbeLocations',
+    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server',
   },
 })
 
