@@ -128,13 +128,20 @@ require('lazy').setup({
 vim.lsp.config('angularls', {
   cmd = {
     'node',
-    '--max-old-space-size=8096',
+    '--max-old-space-size=12960',
     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin/ngserver',
     '--stdio',
     '--tsProbeLocations',
     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
     '--ngProbeLocations',
     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server',
+  },
+})
+
+vim.lsp.config('html', {
+  filetypes = {
+    'html',
+    'htmlangular',
   },
 })
 
