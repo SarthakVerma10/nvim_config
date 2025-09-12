@@ -6,6 +6,6 @@ return {
     require('catppuccin').setup {
       auto_integrations = true,
     }
-    vim.cmd.colorscheme 'catppuccin-latte'
+    vim.cmd.colorscheme 'catppuccin-macchiato'
   end,
 }
