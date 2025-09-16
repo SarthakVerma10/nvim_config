@@ -89,7 +89,7 @@ require('lazy').setup({
   require 'custom.plugins.mini',
   require 'custom.plugins.gitsigns',
   require 'custom.plugins.database',
-  -- require 'custom.plugins.eyeliner',
+  require 'custom.plugins.eyeliner',
   require 'custom.plugins.scratch',
   -- require 'custom.plugins.leap',
   -- require 'custom.plugins.angular',
