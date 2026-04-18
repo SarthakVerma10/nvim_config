@@ -148,6 +148,19 @@ vim.lsp.config('html', {
   },
 })
 
+local lint = require 'lint'
+
+lint.linters_by_ft = {
+  python = { 'ruff', 'mypy' },
+}
+
+-- Trigger linting on save and enter
+vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'InsertLeave' }, {
+  callback = function()
+    lint.try_lint()
+  end,
+})
+
 local lspconfig = require 'lspconfig'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
