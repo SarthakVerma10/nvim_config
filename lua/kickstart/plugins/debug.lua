@@ -155,9 +155,8 @@ return {
     end, { desc = 'Toggle debug UI.' })
 
     vim.keymap.set('n', '<leader>dr', function()
-      require('dapui').close()
-      require('dapui').open()
-    end, { desc = 'Debug: Refresh/Reset UI Layout' })
+      require('dapui').toggle { reset = true }
+    end, { desc = 'DAP UI Reset Toggle' })
 
     -- Change breakpoint icons
     vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
@@ -219,19 +218,5 @@ return {
         end,
       },
     }
-    local function refresh_dap_ui()
-      if dap.session() then
-        vim.defer_fn(function()
-          dapui.close()
-          dapui.open()
-        end, 200) -- 200ms delay to let the terminal resize settle
-      end
-    end
-
-    -- TRIGGER: Listen for both FocusGained and VimResized
-    vim.api.nvim_create_autocmd({ 'FocusGained', 'VimResized' }, {
-      pattern = '*',
-      callback = refresh_dap_ui,
-    })
   end,
 }
