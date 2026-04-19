@@ -99,6 +99,7 @@ require('lazy').setup({
   -- require 'custom.plugins.sonarlint',
   require 'custom.plugins.lazygit',
   require 'custom.plugins.diffview',
+  require 'custom.plugins.dap_virtual_text',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -192,3 +193,7 @@ vim.keymap.set('n', '<leader>gb', function()
     end,
   }
 end, { desc = 'Git diff file against commit' })
+
+vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
+  require('dap.ui.widgets').hover()
+end, { desc = 'DAP Hover' })
