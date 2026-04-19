@@ -120,6 +120,31 @@ return {
           disconnect = '⏏',
         },
       },
+      floating = {
+        max_height = nil,
+        max_width = nil,
+        border = 'single', -- "single", "rounded", "double" help rendering stability
+      },
+      layouts = {
+        {
+          elements = {
+            { id = 'scopes', size = 0.25 },
+            { id = 'breakpoints', size = 0.25 },
+            { id = 'stacks', size = 0.25 },
+            { id = 'watches', size = 0.25 },
+          },
+          position = 'right',
+          size = 40, -- This is the total width of the left panel in columns
+        },
+        {
+          elements = {
+            { id = 'repl', size = 0.5 },
+            { id = 'console', size = 0.5 },
+          },
+          position = 'bottom',
+          size = 10, -- This is the height of the bottom panel in rows
+        },
+      },
     }
     vim.keymap.set({ 'n', 'v' }, '<leader>de', function()
       require('dapui').eval()
@@ -128,6 +153,11 @@ return {
     vim.keymap.set({ 'n' }, '<leader>dt', function()
       dapui.toggle()
     end, { desc = 'Toggle debug UI.' })
+
+    vim.keymap.set('n', '<leader>dr', function()
+      require('dapui').close()
+      require('dapui').open()
+    end, { desc = 'Debug: Refresh/Reset UI Layout' })
 
     -- Change breakpoint icons
     vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
@@ -153,8 +183,22 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
-    require('dap-python').setup '/home/sarthak/buesuite-be-core/.venv/bin/python'
+    require('dap-python').setup '/home/sarthak/python_projects/buesuite-be-core/.venv_313/bin/python'
     dap.configurations.python = {
+      {
+        type = 'python',
+        request = 'launch',
+        name = 'FastAPI Launch',
+        python = '/home/sarthak/python_projects/buesuite-be-core/.venv_313/bin/python',
+        module = 'uvicorn',
+        args = {
+          'app.main:app', -- IMPORTANT: Change 'main' to your file name if it's not main.py
+          '--reload',
+        },
+        console = 'integratedTerminal',
+        -- If you want to see the FastAPI internals while stepping, set this to false
+        justMyCode = true,
+      },
       {
         type = 'python',
         request = 'attach',
@@ -175,5 +219,19 @@ return {
         end,
       },
     }
+    local function refresh_dap_ui()
+      if dap.session() then
+        vim.defer_fn(function()
+          dapui.close()
+          dapui.open()
+        end, 200) -- 200ms delay to let the terminal resize settle
+      end
+    end
+
+    -- TRIGGER: Listen for both FocusGained and VimResized
+    vim.api.nvim_create_autocmd({ 'FocusGained', 'VimResized' }, {
+      pattern = '*',
+      callback = refresh_dap_ui,
+    })
   end,
 }

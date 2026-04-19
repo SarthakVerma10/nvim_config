@@ -41,6 +41,8 @@ vim.o.scrolloff = 10
 
 vim.o.confirm = true
 
+vim.opt.termguicolors = true
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -94,7 +96,7 @@ require('lazy').setup({
   -- require 'custom.plugins.leap',
   -- require 'custom.plugins.angular',
   require 'custom.plugins.visual-multi',
-  require 'custom.plugins.sonarlint',
+  -- require 'custom.plugins.sonarlint',
   require 'custom.plugins.lazygit',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
