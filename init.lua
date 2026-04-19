@@ -170,22 +170,25 @@ local lspconfig = require 'lspconfig'
 --
 vim.keymap.set('n', '<leader>gb', function()
   require('telescope.builtin').git_bcommits {
-    -- Use dropdown theme for a cleaner UI
     theme = 'dropdown',
-    -- Configure layout to give the previewer more space
-    layout_config = {
-      width = 0.8,
-      height = 0.8,
-      preview_width = 0.6, -- Gives the previewer 60% of the screen
-    },
     attach_mappings = function(_, map)
-      map('i', '<CR>', function(prompt_bufnr)
-        local selection = require('telescope.actions.state').get_selected_entry()
-        require('telescope.actions').close(prompt_bufnr)
-        -- Open Diffview for this specific commit
+      local actions = require 'telescope.actions'
+      local action_state = require 'telescope.actions.state'
+
+      -- Define the custom action
+      local open_diffview = function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
         vim.cmd('DiffviewOpen ' .. selection.value)
-      end)
+      end
+
+      -- Map this action to both modes
+      map('i', '<CR>', open_diffview)
+      map('n', '<CR>', open_diffview)
+
+      -- Return true to indicate we have handled the mapping,
+      -- preventing the default 'git checkout' behavior
       return true
     end,
   }
-end, { desc = 'Git diff file (View Commits)' })
+end, { desc = 'Git diff file against commit' })
