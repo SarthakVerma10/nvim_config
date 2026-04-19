@@ -98,6 +98,7 @@ require('lazy').setup({
   require 'custom.plugins.visual-multi',
   -- require 'custom.plugins.sonarlint',
   require 'custom.plugins.lazygit',
+  require 'custom.plugins.diffview',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -166,3 +167,25 @@ vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'InsertLeave' }, {
 local lspconfig = require 'lspconfig'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+vim.keymap.set('n', '<leader>gb', function()
+  require('telescope.builtin').git_bcommits {
+    -- Use dropdown theme for a cleaner UI
+    theme = 'dropdown',
+    -- Configure layout to give the previewer more space
+    layout_config = {
+      width = 0.8,
+      height = 0.8,
+      preview_width = 0.6, -- Gives the previewer 60% of the screen
+    },
+    attach_mappings = function(_, map)
+      map('i', '<CR>', function(prompt_bufnr)
+        local selection = require('telescope.actions.state').get_selected_entry()
+        require('telescope.actions').close(prompt_bufnr)
+        -- Open Diffview for this specific commit
+        vim.cmd('DiffviewOpen ' .. selection.value)
+      end)
+      return true
+    end,
+  }
+end, { desc = 'Git diff file (View Commits)' })
