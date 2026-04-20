@@ -94,7 +94,7 @@ require('lazy').setup({
   -- require 'custom.plugins.leap',
   -- require 'custom.plugins.angular',
   require 'custom.plugins.visual-multi',
-  require 'custom.plugins.sonarlint',
+  -- require 'custom.plugins.sonarlint',
   require 'custom.plugins.lazygit',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -128,16 +128,34 @@ require('lazy').setup({
   },
 })
 
+-- vim.lsp.config('angularls', {
+--   cmd = {
+--     'node',
+--     '--max-old-space-size=12960',
+--     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin/ngserver',
+--     '--stdio',
+--     '--tsProbeLocations',
+--     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
+--     '--ngProbeLocations',
+--     os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server',
+--   },
+-- })
+-- Get the base data directory (cross-platform)
+local data_path = vim.fn.stdpath 'data'
+-- Use gsub to ensure all slashes are backslashes for Windows stability
+local mason_bin = data_path:gsub('/', '\\') .. '\\mason\\packages'
+
 vim.lsp.config('angularls', {
   cmd = {
     'node',
     '--max-old-space-size=12960',
-    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin/ngserver',
+    mason_bin .. '\\angular-language-server\\node_modules\\@angular\\language-server\\bin\\ngserver',
     '--stdio',
     '--tsProbeLocations',
-    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
+    -- POINT TO THE node_modules FOLDER, NOT THE LIB FOLDER
+    mason_bin .. '\\typescript-language-server\\node_modules',
     '--ngProbeLocations',
-    os.getenv 'HOME' .. '/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server',
+    mason_bin .. '\\angular-language-server\\node_modules\\@angular\\language-server',
   },
 })
 
