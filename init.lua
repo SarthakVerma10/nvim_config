@@ -41,6 +41,8 @@ vim.o.scrolloff = 10
 
 vim.o.confirm = true
 
+vim.opt.termguicolors = true
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
@@ -96,6 +98,8 @@ require('lazy').setup({
   require 'custom.plugins.visual-multi',
   -- require 'custom.plugins.sonarlint',
   require 'custom.plugins.lazygit',
+  require 'custom.plugins.diffview',
+  require 'custom.plugins.dap_virtual_text',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -166,6 +170,48 @@ vim.lsp.config('html', {
   },
 })
 
+local lint = require 'lint'
+
+lint.linters_by_ft = {
+  python = { 'ruff', 'mypy' },
+}
+
+-- Trigger linting on save and enter
+vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'InsertLeave' }, {
+  callback = function()
+    lint.try_lint()
+  end,
+})
+
 local lspconfig = require 'lspconfig'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+vim.keymap.set('n', '<leader>gb', function()
+  require('telescope.builtin').git_bcommits {
+    theme = 'dropdown',
+    attach_mappings = function(_, map)
+      local actions = require 'telescope.actions'
+      local action_state = require 'telescope.actions.state'
+
+      -- Define the custom action
+      local open_diffview = function(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        vim.cmd('DiffviewOpen ' .. selection.value)
+      end
+
+      -- Map this action to both modes
+      map('i', '<CR>', open_diffview)
+      map('n', '<CR>', open_diffview)
+
+      -- Return true to indicate we have handled the mapping,
+      -- preventing the default 'git checkout' behavior
+      return true
+    end,
+  }
+end, { desc = 'Git diff file against commit' })
+
+vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
+  require('dap.ui.widgets').hover()
+end, { desc = 'DAP Hover' })
