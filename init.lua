@@ -146,29 +146,70 @@ require('lazy').setup({
 -- })
 -- Get the base data directory (cross-platform)
 local data_path = vim.fn.stdpath 'data'
--- Use gsub to ensure all slashes are backslashes for Windows stability
-local mason_bin = data_path:gsub('/', '\\') .. '\\mason\\packages'
+
+-- 1. Angular Configuration
+local mason_pkg = vim.fs.normalize(vim.fn.stdpath 'data' .. '/mason/packages')
+local project_root = vim.fn.getcwd()
 
 vim.lsp.config('angularls', {
   cmd = {
     'node',
     '--max-old-space-size=12960',
-    mason_bin .. '\\angular-language-server\\node_modules\\@angular\\language-server\\bin\\ngserver',
+    vim.fs.normalize(mason_pkg .. '/angular-language-server/node_modules/@angular/language-server/bin/ngserver'),
     '--stdio',
     '--tsProbeLocations',
-    -- POINT TO THE node_modules FOLDER, NOT THE LIB FOLDER
-    mason_bin .. '\\typescript-language-server\\node_modules',
+    vim.fs.normalize(project_root .. '/node_modules'),
     '--ngProbeLocations',
-    mason_bin .. '\\angular-language-server\\node_modules\\@angular\\language-server',
+    vim.fs.normalize(mason_pkg .. '/angular-language-server/node_modules/@angular/language-server/bin'),
+  },
+  root_dir = vim.fs.root(0, { 'angular.json', 'package.json' }),
+  -- This is the "Truth" check
+  on_init = function(client)
+    vim.notify('AngularLS is initializing workspace: ' .. client.root_dir, vim.log.levels.INFO)
+    return true
+  end,
+  -- Force some flags so they aren't nil
+  flags = {
+    debounce_text_changes = 150,
+    allow_incremental_sync = true,
   },
 })
 
-vim.lsp.config('html', {
-  filetypes = {
-    'html',
-    'htmlangular',
+-- 2. VTSLS (The TypeScript Server)
+vim.lsp.config('vtsls', {
+  -- Use the .cmd wrapper for Windows stability
+  cmd = { vim.fs.normalize(mason_pkg .. '/vtsls/node_modules/.bin/vtsls.cmd'), '--stdio' },
+  settings = {
+    typescript = {
+      tsserver = {
+        maxTsServerMemory = 8192,
+      },
+    },
+    vtsls = {
+      autoUseWorkspaceTsdk = true,
+    },
   },
 })
+
+-- 3. HTML (Already in your Mason list)
+vim.lsp.config('html', {
+  filetypes = { 'html', 'htmlangular' },
+})
+
+-- 4. Lua (For your config files)
+vim.lsp.config('lua_ls', {
+  settings = {
+    Lua = {
+      diagnostics = { globals = { 'vim' } },
+    },
+  },
+})
+
+-- 5. Enable everything
+vim.lsp.enable 'angularls'
+vim.lsp.enable 'vtsls'
+vim.lsp.enable 'html'
+vim.lsp.enable 'lua_ls'
 
 local lint = require 'lint'
 
@@ -215,3 +256,33 @@ end, { desc = 'Git diff file against commit' })
 vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
   require('dap.ui.widgets').hover()
 end, { desc = 'DAP Hover' })
+
+-- Add this at the bottom of your init.lua
+vim.api.nvim_create_autocmd('LspProgress', {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if not client or client.name ~= 'angularls' then
+      return
+    end
+
+    local value = ev.data.params.value
+    if not value then
+      return
+    end
+
+    -- AngularLS sends 'begin', 'report', and 'end'
+    if value.kind == 'begin' then
+      vim.api.nvim_echo({ { ' AngularLS: Indexing Workspace...', 'WarningMsg' } }, false, {})
+    elseif value.kind == 'report' then
+      local msg = value.message or 'Analyzing files...'
+      -- Use nvim_echo to keep it on the command line without creating a history popup
+      vim.api.nvim_echo({ { ' AngularLS: ' .. msg, 'WarningMsg' } }, false, {})
+    elseif value.kind == 'end' then
+      vim.api.nvim_echo({ { ' AngularLS: Ready', 'DiagnosticOk' } }, false, {})
+      -- Clear the message after 2 seconds
+      vim.defer_fn(function()
+        vim.api.nvim_echo({ { '', '' } }, false, {})
+      end, 2000)
+    end
+  end,
+})
