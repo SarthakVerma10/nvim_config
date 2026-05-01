@@ -106,6 +106,7 @@ return {
       -- Set icons to characters that are more likely to work in every terminal.
       --    Feel free to remove or use ones that you like more! :)
       --    Don't feel like these are good choices.
+      expand_lines = false,
       icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
       controls = {
         icons = {
@@ -157,6 +158,10 @@ return {
     vim.keymap.set('n', '<leader>dr', function()
       require('dapui').toggle { reset = true }
     end, { desc = 'DAP UI Reset Toggle' })
+
+    vim.keymap.set('n', '<leader>dB', function()
+      require('dap').clear_breakpoints()
+    end, { desc = 'Clear all breakpoints' })
 
     -- Change breakpoint icons
     vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
@@ -218,5 +223,21 @@ return {
         end,
       },
     }
+    local dap, dapui = require 'dap', require 'dapui'
+
+    dap.listeners.before.attach.dapui_config = function()
+      dapui.open()
+    end
+    dap.listeners.before.launch.dapui_config = function()
+      dapui.open()
+    end
+    dap.listeners.before.event_terminated.dapui_config = function()
+      dapui.close()
+    end
+    dap.listeners.before.event_exited.dapui_config = function()
+      dapui.close()
+    end
   end,
 }
+
+-- python -m debugpy --listen 5678 --wait-for-client -m uvicorn main:app --reload                               .venv_313 3.13.12  15:53
