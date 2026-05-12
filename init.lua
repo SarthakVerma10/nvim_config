@@ -8,7 +8,7 @@ vim.o.relativenumber = true
 
 vim.o.mouse = 'a'
 
-vim.o.showmode = false
+vim.o.showmode = true
 
 vim.schedule(function()
   vim.o.clipboard = 'unnamedplus'
@@ -172,6 +172,13 @@ vim.lsp.config('angularls', {
   flags = {
     debounce_text_changes = 150,
     allow_incremental_sync = true,
+  },
+  init_options = {
+    -- Stops the server from indexing every single .d.ts file in node_modules
+    -- This is the #1 way to speed up startup.
+    includeExternalLibraries = false,
+    -- Tells the server to only use the files defined in your tsconfig
+    forceStrictTemplates = true,
   },
 })
 
