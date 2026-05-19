@@ -100,6 +100,7 @@ require('lazy').setup({
   require 'custom.plugins.lazygit',
   require 'custom.plugins.diffview',
   require 'custom.plugins.dap_virtual_text',
+  require 'custom.plugins.treesitter-context',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
