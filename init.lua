@@ -199,3 +199,7 @@ end, { desc = 'Git diff file against commit' })
 vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
   require('dap.ui.widgets').hover()
 end, { desc = 'DAP Hover' })
+
+-- Resize horizontally (Make taller/shorter)
+vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +5<CR>", { desc = "Increase window width" })
+vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -5<CR>", { desc = "Decrease window width" })
